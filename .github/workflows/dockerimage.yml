@@ -9,11 +9,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Docker Publish
-      uses: manusa/actions-publish-docker@v1.0.1
+    - name: Build, Tag, Publish Docker
+      uses: HurricanKai/Publish-Docker-Github-Action@1.12.1
       with:
         name: taylor/crf
-        tag: latest
-        username: TaylorHere
-        password: Taylor357753
+        tagging: true
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
         registry: registry.cn-hangzhou.aliyuncs.com
+        cache: true
