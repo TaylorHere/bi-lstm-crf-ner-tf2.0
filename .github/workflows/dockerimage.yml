@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag registry.cn-hangzhou.aliyuncs.com/taylor/crf:$(date +%s) && docker push registry.cn-hangzhou.aliyuncs.com/taylor/crf:$(date +%s)
+    - name: Publish Docker
+      uses: elgohr/Publish-Docker-Github-Action@2.12
+      with:
+        name: registry.cn-hangzhou.aliyuncs.com/taylor/crf:$(git rev-parse --verify HEAD)
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
