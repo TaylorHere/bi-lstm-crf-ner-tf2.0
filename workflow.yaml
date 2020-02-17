@@ -8,23 +8,66 @@ kind: Workflow
 metadata:
   generateName: trainer-
 spec:
-  entrypoint: trainer-cpu
+  entrypoint: builder-trainer
   volumes:
     - name: workdir
       persistentVolumeClaim:
         claimName: nas-pvc
+    - name: docker
+      hostPath:
+        path: /var/lib/docker/images/
 
   templates:
+    - name: builder-trainer
+      steps:
+          - - name: builder
+              template: builder
+          - - name: trainer-cpu
+              template: trainer-cpu
+
+    - name: builder
+      container:
+        image: 'docker:stable-git'
+        command:
+          - sh
+          - '-c'
+        args:
+          - >-
+            docker login -u TaylorHere
+            registry.cn-hangzhou.aliyuncs.com -p Taylor357753 &&
+            cd /mnt/vol/ && 
+            if cd git/ner; then git 
+            pull; else git clone https://github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git
+            git/ner && cd git/ner;
+            fi && docker build -t
+            registry.cn-hangzhou.aliyuncs.com/taylor/crf:cpu-py3
+            . && docker push
+            registry.cn-hangzhou.aliyuncs.com/taylor/crf:cpu-py3
+        env:
+          - name: DOCKER_HOST
+            value: 127.0.0.1
+        volumeMounts:
+          - name: workdir
+            mountPath: /mnt/vol
+          - name: docker
+            mountPath: /var/lib/docker/images/
+      sidecars:
+        - name: dind
+          image: 'docker:18.09.4-dind'
+          securityContext:
+            privileged: true
+          mirrorVolumeMounts: true
+
     - name: trainer-cpu
       container:
         image: registry.cn-hangzhou.aliyuncs.com/taylor/crf:cpu-py3
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command:
           - python
           - train.py
         volumeMounts:
           - name: workdir
-            mountPath: /share/
+            mountPath: /home/jovyan/shared/
 
     - name: trainer-gpu
       container:
@@ -38,20 +81,4 @@ spec:
           - train.py
         volumeMounts:
           - name: workdir
-            mountPath: /share/
-
-
-    - name: trainer-gpu-multi-node
-      container:
-        imagePullPolicy: IfNotPresent
-        resources:
-          limits:
-            nvidia.com/gpu: 4                       
-        image: registry.cn-hangzhou.aliyuncs.com/taylor/crf:gpu-py3
-        command:
-          - python
-          - multi-node-train.py
-        volumeMounts:
-          - name: workdir
-            mountPath: /share/
-
+            mountPath: /home/jovyan/shared/
