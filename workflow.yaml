@@ -2,80 +2,37 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: nas-pvc
-spec:
-  accessModes: [ "ReadWriteOnce" ]
-  resources:
-    requests:
-      storage: 100Gi
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: build-train-
+  generateName: trainer-
 spec:
-  entrypoint: build-train
-
-  arguments:
-    parameters:
-      - name: repo
-      - name: local
-      - name: path
-      - name: username
-      - name: password
-      - name: registry
-      - name: image
-      - name: tag
+  entrypoint: trainer-cpu
   volumes:
     - name: workdir
       persistentVolumeClaim:
         claimName: nas-pvc
 
   templates:
-
-    - name: build-train
-      steps:
-        - - name: builder
-            template: builder
-        - - name: trainer
-            template: trainer
-
-    - name: builder
+    - name: trainer-cpu
       container:
-        image: 'docker:stable-git'
-        command:
-          - sh
-          - '-c'
-        args:
-          - >-
-            docker login -u {{workflow.parameters.username}}
-            {{workflow.parameters.registry}} -p {{workflow.parameters.password}} &&
-            cd /mnt/vol/ && if cd git/{{workflow.parameters.local}}; then git
-            pull; else git clone {{workflow.parameters.repo}}
-            git/{{workflow.parameters.local}} &&  git/{{workflow.parameters.local}};
-            fi && docker build -t
-            {{workflow.parameters.image}}:{{workflow.parameters.tag}}
-            {{workflow.parameters.path}} && docker push
-            {{workflow.parameters.image}}:{{workflow.parameters.tag}}
-        env:
-          - name: DOCKER_HOST
-            value: 127.0.0.1
-        volumeMounts:
-          - name: workdir
-            mountPath: /mnt/vol
-      sidecars:
-        - name: dind
-          image: 'docker:18.09.4-dind'
-          securityContext:
-            privileged: true
-          mirrorVolumeMounts: true
-
-    - name: trainer
-      container:
-        image: "{{workflow.parameters.image}}:{{workflow.parameters.tag}}"
+        image: registry.cn-hangzhou.aliyuncs.com/taylor/crf:cpu-py3
         command:
           - python
           - train.py
         volumeMounts:
           - name: workdir
             mountPath: /share/
+
+    - name: trainer-gpu
+      container:
+        image: registry.cn-hangzhou.aliyuncs.com/taylor/crf:gpu-py3
+        command:
+          - python
+          - train.py
+        volumeMounts:
+          - name: workdir
+            mountPath: /share/
+
 
