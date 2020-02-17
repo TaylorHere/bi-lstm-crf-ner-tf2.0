@@ -12,6 +12,7 @@ jobs:
     - name: Publish Docker
       uses: elgohr/Publish-Docker-Github-Action@2.12
       with:
-        name: registry.cn-hangzhou.aliyuncs.com/taylor/crf:$(git rev-parse --verify HEAD)
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        name: taylor/crf:$(git rev-parse --verify HEAD)
+        username: TaylorHere
+        password: Taylor357753
+        registry: registry.cn-hangzhou.aliyuncs.com
