@@ -1,0 +1,8 @@
+repo: https://github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git
+local: crf
+path: /
+image: registry.cn-hangzhou.aliyuncs.com/taylor/crf
+tag: test
+username: TaylorHere
+password: Taylor357753
+registry: registry.cn-hangzhou.aliyuncs.com

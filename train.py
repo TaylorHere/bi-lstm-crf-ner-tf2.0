@@ -33,7 +33,6 @@ logger.info("hidden_num:{}, vocab_size:{}, label_size:{}".format(args.hidden_num
 model = NerModel(hidden_num = args.hidden_num, vocab_size = len(vocab2id), label_size= len(tag2id), embedding_size = args.embedding_size)
 optimizer = tf.keras.optimizers.Adam(args.lr)
 
-
 ckpt = tf.train.Checkpoint(optimizer=optimizer, model=model)
 ckpt.restore(tf.train.latest_checkpoint(args.output_dir))
 ckpt_manager = tf.train.CheckpointManager(ckpt,
