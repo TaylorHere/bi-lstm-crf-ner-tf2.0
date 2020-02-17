@@ -1,3 +1,4 @@
+![Docker Image CI](https://github.com/TaylorHere/bi-lstm-crf-ner-tf2.0/workflows/Docker%20Image%20CI/badge.svg)
 
 # bi-lstm-crf-ner-tf2.0
 
