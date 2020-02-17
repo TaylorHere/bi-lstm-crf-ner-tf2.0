@@ -13,7 +13,7 @@ jobs:
       uses: manusa/actions-publish-docker@v1.0.1
       with:
         name: taylor/crf
-        tag: $GITHUB_SHA
+        tag: latest
         username: TaylorHere
         password: Taylor357753
         registry: registry.cn-hangzhou.aliyuncs.com
