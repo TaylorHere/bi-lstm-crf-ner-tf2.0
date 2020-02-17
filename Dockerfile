@@ -1,3 +1,5 @@
-FROM tensorflow/tensorflow
-ADD . /code/
+FROM tensorflow/tensorflow:2.0.1-py3
 WORKDIR /code/
+ADD ./requirements.txt requirements.txt
+RUN python3 -m pip install -r requirements.txt
+ADD . /code/
