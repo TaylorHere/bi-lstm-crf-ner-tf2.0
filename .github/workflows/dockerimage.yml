@@ -9,8 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Publish Docker
-      uses: elgohr/Publish-Docker-Github-Action@2.12
+    - name: Docker Publish
+      uses: manusa/actions-publish-docker@v1.0.1
       with:
         name: taylor/crf
         tag: $GITHUB_SHA
