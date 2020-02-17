@@ -12,9 +12,9 @@ jobs:
     - name: Build, Tag, Publish Docker
       uses: HurricanKai/Publish-Docker-Github-Action@1.12.1
       with:
-        name: taylor/crf
+        name: crf
         tagging: true
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        registry: registry.cn-hangzhou.aliyuncs.com
+        registry: registry.cn-hangzhou.aliyuncs.com/taylor
         cache: true
