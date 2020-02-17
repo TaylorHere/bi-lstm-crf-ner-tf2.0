@@ -30,6 +30,11 @@ log_capture_string = StringBuffer()
 
 
 proj_dir = os.path.dirname(__file__)
+try:
+    os.mkdir(os.path.join(proj_dir, 'log'))
+except:
+    pass
+    
 _LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

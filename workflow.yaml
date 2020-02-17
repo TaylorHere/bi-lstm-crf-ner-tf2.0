@@ -29,11 +29,9 @@ spec:
     - name: trainer-gpu
       container:
         imagePullPolicy: IfNotPresent
-        nodeSelector:
-            aliyun.accelerator/nvidia_count: 4
         resources:
-          limits:
-            nvidia.com/gpu: 4                       
+            limits:
+                nvidia.com/gpu: 4                       
         image: registry.cn-hangzhou.aliyuncs.com/taylor/crf:gpu-py3
         command:
           - python
@@ -46,15 +44,13 @@ spec:
     - name: trainer-gpu-multi-node
       container:
         imagePullPolicy: IfNotPresent
-        nodeSelector:
-            aliyun.accelerator/nvidia_count: 4
         resources:
           limits:
             nvidia.com/gpu: 4                       
         image: registry.cn-hangzhou.aliyuncs.com/taylor/crf:gpu-py3
         command:
           - python
-          - train.py
+          - multi-node-train.py
         volumeMounts:
           - name: workdir
             mountPath: /share/

@@ -6,11 +6,11 @@
 import argparse
 
 parser = argparse.ArgumentParser(description="train")
-parser.add_argument("--train_path", type=str, default="/share/data/train.txt",help="train file")
-parser.add_argument("--test_path", type=str, default="/share/data/test.txt",help="test file")
-parser.add_argument("--output_dir", type=str, default="/share/checkpoints/",help="output_dir")
-parser.add_argument("--vocab_file", type=str, default="/share/data/vocab.txt",help="vocab_file")
-parser.add_argument("--tag_file", type=str, default="/share/data/tags.txt",help="tag_file")
+parser.add_argument("--train_path", type=str, default="/home/jovyan/shared/data/train.txt",help="train file")
+parser.add_argument("--test_path", type=str, default="/home/jovyan/shared/data/test.txt",help="test file")
+parser.add_argument("--output_dir", type=str, default="/home/jovyan/shared/data/checkpoints/",help="output_dir")
+parser.add_argument("--vocab_file", type=str, default="/home/jovyan/shared/data/vocab.txt",help="vocab_file")
+parser.add_argument("--tag_file", type=str, default="/home/jovyan/shared/data/tags.txt",help="tag_file")
 parser.add_argument("--batch_size", type=int, default=32,help="batch_size")
 parser.add_argument("--hidden_num", type=int, default=512,help="hidden_num")
 parser.add_argument("--embedding_size", type=int, default=300,help="embedding_size")
