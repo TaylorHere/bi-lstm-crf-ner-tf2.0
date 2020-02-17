@@ -71,7 +71,7 @@ spec:
 
     - name: trainer
       container:
-        image: 'registry.cn-hangzhou.aliyuncs.com/taylor/crf:test'
+        image: "{{workflow.parameters.image}}:{{workflow.parameters.tag}}"
         command:
           - python
           - train.py
