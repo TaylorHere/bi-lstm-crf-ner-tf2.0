@@ -1,3 +1,5 @@
+![Docker Image CI](https://github.com/TaylorHere/bi-lstm-crf-ner-tf2.0/workflows/Docker%20Image%20CI/badge.svg?branch=master)
+
 # bi-lstm-crf-ner-tf2.0
 
 Named Entity Recognition (NER) task using Bi-LSTM-CRF model implemented in Tensorflow2.0.
