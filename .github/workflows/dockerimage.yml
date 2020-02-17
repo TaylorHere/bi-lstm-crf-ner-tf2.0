@@ -12,7 +12,7 @@ jobs:
     - name: Publish Docker
       uses: elgohr/Publish-Docker-Github-Action@2.12
       with:
-        name: taylor/crf:${{ GITHUB_SHA }}
+        name: taylor/crf:$GITHUB_SHA
         username: TaylorHere
         password: Taylor357753
         registry: registry.cn-hangzhou.aliyuncs.com
