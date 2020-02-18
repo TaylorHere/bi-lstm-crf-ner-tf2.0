@@ -50,6 +50,7 @@ spec:
         args: [
           "--dockerfile={{workflow.parameters.dockerfile}}",
           "--context=git://{{workflow.parameters.repo}}",
+          "--insecure={{workflow.parameters.registry}}",
           "--destination={{workflow.parameters.registry}}/{{workflow.parameters.project}}/{{workflow.parameters.image}}:{{workflow.name}}",
           "--cache=true",
           "--cache-dir=/tmp/builder/cache",
