@@ -11,7 +11,10 @@ import tensorflow_addons as tf_ad
 import os
 import numpy as np
 from args_help import args
-from logger import logger
+# from logger import logger
+import logging
+logger = logging.getLogger('default')
+
 
 
 if not (os.path.exists(args.vocab_file) and os.path.exists(args.tag_file)):

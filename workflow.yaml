@@ -22,8 +22,8 @@ spec:
       steps:
           - - name: builder
               template: builder
-          - - name: trainer-cpu
-              template: trainer-cpu
+          - - name: submit-trainer-gpu
+              template: submit-trainer-gpu
 
     - name: builder
       container:
@@ -58,27 +58,51 @@ spec:
             privileged: true
           mirrorVolumeMounts: true
 
-    - name: trainer-cpu
-      container:
-        image: registry.cn-hangzhou.aliyuncs.com/taylor/crf:cpu-py3
-        imagePullPolicy: Always
-        command:
-          - python
-          - train.py
-        volumeMounts:
-          - name: workdir
-            mountPath: /home/jovyan/shared/
-
-    - name: trainer-gpu
-      container:
-        imagePullPolicy: IfNotPresent
-        resources:
-            limits:
-                nvidia.com/gpu: 4                       
-        image: registry.cn-hangzhou.aliyuncs.com/taylor/crf:gpu-py3
-        command:
-          - python
-          - train.py
-        volumeMounts:
-          - name: workdir
-            mountPath: /home/jovyan/shared/
+    - name: submit-trainer-gpu
+      resource:                   # indicates that this is a resource template
+        action: create            # can be any kubectl action (e.g. create, delete, apply, patch)
+        # The successCondition and failureCondition are optional expressions.
+        # If failureCondition is true, the step is considered failed.
+        # If successCondition is true, the step is considered successful.
+        # They use kubernetes label selection syntax and can be applied against any field
+        # of the resource (not just labels). Multiple AND conditions can be represented by comma
+        # delimited expressions.
+        # For more details: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+        successCondition: status.succeeded > 0
+        failureCondition: status.failed > 0
+        manifest: |               #put your kubernetes spec here
+            apiVersion: batch/v1
+            kind: Job
+            metadata:
+                generateName: trainer-job-
+                ownerReferences:
+                - apiVersion: argoproj.io/v1alpha1
+                  blockOwnerDeletion: true
+                  kind: Workflow
+                  name: "{{workflow.name}}"
+                  uid: "{{workflow.uid}}"
+            spec:
+              template:
+                metadata:
+                  annotations:
+                    k8s.aliyun.com/eci-gpu-type : "T4"
+                  name: trainer-job
+                spec:
+                  restartPolicy: Never
+                  volumes:
+                    - name: workdir
+                      persistentVolumeClaim:
+                        claimName: nas-pvc
+                  containers:
+                  - name: trainer-job
+                    imagePullPolicy: IfNotPresent
+                    resources:
+                      limits:
+                          nvidia.com/gpu:  1
+                    image: registry.cn-hangzhou.aliyuncs.com/taylor/crf:cpu-py3
+                    command:
+                      - python
+                      - train.py
+                    volumeMounts:
+                      - name: workdir
+                        mountPath: /home/jovyan/shared/
