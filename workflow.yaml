@@ -127,16 +127,8 @@ spec:
     - name: exit-handler
       resource:
           action: delete
-          successCondition: status.succeeded > 0
-          failureCondition: status.failed > 0
           manifest: |
               apiVersion: batch/v1
               kind: Job
               metadata:
-                  generateName: trainer-job-
-                  ownerReferences:
-                  - apiVersion: argoproj.io/v1alpha1
-                    blockOwnerDeletion: true
-                    kind: Workflow
-                    name: "{{workflow.name}}"
-                    uid: "{{workflow.uid}}"
+                  name: {{workflow.steps[2].podname}}
