@@ -8,56 +8,12 @@ kind: Workflow
 metadata:
   generateName: trainer-
 spec:
-  entrypoint: builder-trainer
+  entrypoint: submit-trainer-gpu
   volumes:
     - name: workdir
       persistentVolumeClaim:
         claimName: nas-pvc
-    - name: docker
-      hostPath:
-        path: /var/lib/docker/images/
-
   templates:
-    - name: builder-trainer
-      steps:
-          - - name: builder
-              template: builder
-          - - name: submit-trainer-gpu
-              template: submit-trainer-gpu
-
-    - name: builder
-      container:
-        image: 'docker:stable-git'
-        command:
-          - sh
-          - '-c'
-        args:
-          - >-
-            docker login -u TaylorHere
-            registry.cn-hangzhou.aliyuncs.com -p Taylor357753 &&
-            cd /mnt/vol/ && 
-            if cd git/ner; then git 
-            pull; else git clone https://github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git
-            git/ner && cd git/ner;
-            fi && docker build -t
-            registry.cn-hangzhou.aliyuncs.com/taylor/crf:gpu-py3
-            . && docker push
-            registry.cn-hangzhou.aliyuncs.com/taylor/crf:gpu-py3
-        env:
-          - name: DOCKER_HOST
-            value: 127.0.0.1
-        volumeMounts:
-          - name: workdir
-            mountPath: /mnt/vol
-          - name: docker
-            mountPath: /var/lib/docker/images/
-      sidecars:
-        - name: dind
-          image: 'docker:18.09.4-dind'
-          securityContext:
-            privileged: true
-          mirrorVolumeMounts: true
-
     - name: submit-trainer-gpu
       resource:                   # indicates that this is a resource template
         action: create            # can be any kubectl action (e.g. create, delete, apply, patch)
