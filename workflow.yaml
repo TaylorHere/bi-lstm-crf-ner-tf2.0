@@ -14,7 +14,7 @@ spec:
     - name: repo
       value: github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git
     - name: registry
-      value: registry.cn-hangzhou.aliyuncs.com
+      value: registry.cn-beijing.aliyuncs.com
     - name: project
       value: taylor
     - name: image
@@ -52,7 +52,8 @@ spec:
           "--context=git://{{workflow.parameters.repo}}",
           "--destination={{workflow.parameters.registry}}/{{workflow.parameters.project}}/{{workflow.parameters.image}}:{{workflow.name}}",
           "--cache=true",
-          "--cache-dir=/tmp/builder/cache"
+          "--cache-dir=/tmp/builder/cache",
+          "--single-snapshot",
         ]
         volumeMounts:
           - name: kaniko-secret
