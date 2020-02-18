@@ -44,8 +44,7 @@ spec:
               template: submit-trainer-gpu
 
     - name: builder
-      retryStrategy:
-        limit: 2
+      retryStrategy: {}
       container:
         image: registry.cn-hangzhou.aliyuncs.com/taylor/kaniko:latest
         args: [
