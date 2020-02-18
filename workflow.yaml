@@ -9,7 +9,6 @@ metadata:
   generateName: builder-trainer-
 spec:
   entrypoint: builder-trainer
-  onExit: exit-handler  
   arguments:
     parameters:
     - name: repo
@@ -45,8 +44,8 @@ spec:
               template: puller
           - - name: builder
               template: builder
-          - - name: submit-trainer-gpu
-              template: submit-trainer-gpu
+          - - name: submiter
+              template: submiter
 
     - name: puller
       retryStrategy: {}
@@ -82,7 +81,7 @@ spec:
           - name: workdir
             mountPath: /tmp/
 
-    - name: submit-trainer-gpu
+    - name: submiter
       resource:
         action: create
         successCondition: status.succeeded > 0
@@ -123,12 +122,3 @@ spec:
                     volumeMounts:
                       - name: workdir
                         mountPath: "{{workflow.parameters.train-data-mount-path}}"
-
-    - name: exit-handler
-      resource:
-          action: delete
-          manifest: |
-              apiVersion: batch/v1
-              kind: Job
-              metadata:
-                  name: {{workflow.steps[2].podname}}
