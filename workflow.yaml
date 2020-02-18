@@ -6,16 +6,34 @@ metadata:
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  generateName: trainer-
+  generateName: builder-trainer-
 spec:
   entrypoint: builder-trainer
+  arguments:
+    parameters:
+    - name: repo
+      value: github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git
+    - name: registry
+      value: registry.cn-hangzhou.aliyuncs.com
+    - name: project
+      value: taylor
+    - name: image
+      value: crf
+    - name: dockerfile
+      value: Dockerfile
+    - name: train-data-mount-path
+      value: /home/jovyan/shared/
+    - name: gpu-type
+      value: T4
+    - name: gpu-limits
+      value: 1
   volumes:
     - name: workdir
       persistentVolumeClaim:
         claimName: nas-pvc
-    - name: docker
-      hostPath:
-        path: /var/lib/docker/images/
+    - name: kaniko-secret
+      secret:
+        secretName: kaniko-secret
 
   templates:
     - name: builder-trainer
@@ -26,51 +44,32 @@ spec:
               template: submit-trainer-gpu
 
     - name: builder
+      retryStrategy:
+        limit: 2
       container:
-        image: 'docker:stable-git'
-        command:
-          - sh
-          - '-c'
-        args:
-          - >-
-            docker login -u TaylorHere
-            registry.cn-hangzhou.aliyuncs.com -p Taylor357753 &&
-            cd /mnt/vol/ && 
-            if cd git/ner; then git 
-            pull; else git clone https://github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git
-            git/ner && cd git/ner;
-            fi && docker build -t
-            registry.cn-hangzhou.aliyuncs.com/taylor/crf:gpu-py3
-            . && docker push
-            registry.cn-hangzhou.aliyuncs.com/taylor/crf:gpu-py3
-        env:
-          - name: DOCKER_HOST
-            value: 127.0.0.1
+        image: registry.cn-hangzhou.aliyuncs.com/taylor/kaniko:latest
+        args: [
+          "--dockerfile={{workflow.parameters.dockerfile}}",
+          "--context=git://{{workflow.parameters.repo}}",
+          "--destination={{workflow.parameters.registry}}/{{workflow.parameters.project}}/{{workflow.parameters.image}}:{{workflow.name}}",
+          "--cache=true",
+          "--cache-dir=/tmp/builder/cache"
+        ]
         volumeMounts:
+          - name: kaniko-secret
+            mountPath: /secret
           - name: workdir
-            mountPath: /mnt/vol
-          - name: docker
-            mountPath: /var/lib/docker/images/
-      sidecars:
-        - name: dind
-          image: 'docker:18.09.4-dind'
-          securityContext:
-            privileged: true
-          mirrorVolumeMounts: true
+            mountPath: /tmp/
+        env:
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /secret/kaniko-secret.json
 
     - name: submit-trainer-gpu
-      resource:                   # indicates that this is a resource template
-        action: create            # can be any kubectl action (e.g. create, delete, apply, patch)
-        # The successCondition and failureCondition are optional expressions.
-        # If failureCondition is true, the step is considered failed.
-        # If successCondition is true, the step is considered successful.
-        # They use kubernetes label selection syntax and can be applied against any field
-        # of the resource (not just labels). Multiple AND conditions can be represented by comma
-        # delimited expressions.
-        # For more details: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+      resource:
+        action: create
         successCondition: status.succeeded > 0
         failureCondition: status.failed > 0
-        manifest: |               #put your kubernetes spec here
+        manifest: |
             apiVersion: batch/v1
             kind: Job
             metadata:
@@ -85,7 +84,7 @@ spec:
               template:
                 metadata:
                   annotations:
-                    k8s.aliyun.com/eci-gpu-type : "T4"
+                    k8s.aliyun.com/eci-gpu-type : {{workflow.parameters.gpu-type}}
                   name: trainer-job
                 spec:
                   restartPolicy: Never
@@ -98,11 +97,11 @@ spec:
                     imagePullPolicy: IfNotPresent
                     resources:
                       limits:
-                          nvidia.com/gpu:  1
-                    image: registry.cn-hangzhou.aliyuncs.com/taylor/crf:gpu-py3
+                          nvidia.com/gpu: {{workflow.parameters.gpu-limits}}
+                    image: {{workflow.parameters.image}}:{{workflow.name}}
                     command:
                       - python
                       - train.py
                     volumeMounts:
                       - name: workdir
-                        mountPath: /home/jovyan/shared/
+                        mountPath: {{workflow.parameters.train-data-mount-path}}

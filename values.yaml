@@ -1,0 +1,16 @@
+#code repo without schema
+repo: github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git
+#image registry base url
+registry: registry.cn-hangzhou.aliyuncs.com
+#registry project name
+project: taylor
+#image name, iamge tag will be workflow's running name
+image: crf
+#dockerfile path
+dockerfile: Dockerfile
+#trainer's training daga mount path, which your code will used
+train-data-mount-path: /home/jovyan/shared/
+#gpu type, optional: T4  P100  T100
+gpu-type: T4
+#gpu card numer
+gpu-limits: 1
