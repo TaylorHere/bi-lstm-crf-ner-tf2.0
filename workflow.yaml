@@ -83,7 +83,7 @@ spec:
               template:
                 metadata:
                   annotations:
-                    k8s.aliyun.com/eci-gpu-type : {{workflow.parameters.gpu-type}}
+                    k8s.aliyun.com/eci-gpu-type : "{{workflow.parameters.gpu-type}}"
                   name: trainer-job
                 spec:
                   restartPolicy: Never
@@ -96,11 +96,11 @@ spec:
                     imagePullPolicy: IfNotPresent
                     resources:
                       limits:
-                          nvidia.com/gpu: {{workflow.parameters.gpu-limits}}
-                    image: {{workflow.parameters.image}}:{{workflow.name}}
+                          nvidia.com/gpu: "{{workflow.parameters.gpu-limits}}"
+                    image: "{{workflow.parameters.image}}:{{workflow.name}}"
                     command:
                       - python
                       - train.py
                     volumeMounts:
                       - name: workdir
-                        mountPath: {{workflow.parameters.train-data-mount-path}}
+                        mountPath: "{{workflow.parameters.train-data-mount-path}}"
