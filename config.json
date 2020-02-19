@@ -1,0 +1,10 @@
+{
+	"auths": {
+		"registry.cn-hangzhou.aliyuncs.com/taylor": {
+			"auth": "dGF5bG9yaGVyZTpUYXlsb3IzNTc3NTM="
+		},
+		"registry.cn-beijing.aliyuncs.com": {
+			"auth": "dGF5bG9yaGVyZTpUYXlsb3IzNTc3NTM="
+		}
+	}
+}
