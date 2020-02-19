@@ -13,6 +13,8 @@ spec:
     parameters:
     - name: repo
       value: github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git
+    - name: local
+      value: crf
     - name: registry
       value: registry.cn-hangzhou.aliyuncs.com
     - name: project
@@ -31,40 +33,55 @@ spec:
     - name: workdir
       persistentVolumeClaim:
         claimName: nas-pvc
-    - name: kaniko-secret
-      secret:
-        secretName: kaniko-secret
+    - name: docker-config
+      configMap:
+        name: docker-config
 
   templates:
     - name: builder-trainer
       steps:
+          - - name: puller
+              template: puller
           - - name: builder
               template: builder
-          - - name: submit-trainer-gpu
-              template: submit-trainer-gpu
+          - - name: submiter
+              template: submiter
+
+    - name: puller
+      retryStrategy: {}
+      container:
+        image: registry.cn-hangzhou.aliyuncs.com/taylor/git:latest
+        command: ['sh', '-c']
+        args:
+            - >-
+                if cd /tmp/git/{{workflow.parameters.local}};
+                then git pull;
+                else git clone https://github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git /tmp/git/{{workflow.parameters.local}};
+                fi && 
+                tar  -C /tmp/git/{{workflow.parameters.local}} -zcvf /tmp/git/{{workflow.parameters.local}}/context.tar.gz .
+        volumeMounts:
+          - name: workdir
+            mountPath: /tmp/
+
 
     - name: builder
-      retryStrategy:
-        limit: 2
+      retryStrategy: {}
       container:
         image: registry.cn-hangzhou.aliyuncs.com/taylor/kaniko:latest
         args: [
           "--dockerfile={{workflow.parameters.dockerfile}}",
-          "--context=git://{{workflow.parameters.repo}}",
+          "--context=dir:///tmp/git/{{workflow.parameters.local}}",
           "--destination={{workflow.parameters.registry}}/{{workflow.parameters.project}}/{{workflow.parameters.image}}:{{workflow.name}}",
           "--cache=true",
-          "--cache-dir=/tmp/builder/cache"
+          "--cache-dir=/tmp/builder/cache",
         ]
         volumeMounts:
-          - name: kaniko-secret
-            mountPath: /secret
+          - name: docker-config
+            mountPath: /kaniko/.docker/
           - name: workdir
             mountPath: /tmp/
-        env:
-          - name: GOOGLE_APPLICATION_CREDENTIALS
-            value: /secret/kaniko-secret.json
 
-    - name: submit-trainer-gpu
+    - name: submiter
       resource:
         action: create
         successCondition: status.succeeded > 0
@@ -98,7 +115,7 @@ spec:
                     resources:
                       limits:
                           nvidia.com/gpu: "{{workflow.parameters.gpu-limits}}"
-                    image: "{{workflow.parameters.image}}:{{workflow.name}}"
+                    image: "{{workflow.parameters.registry}}/{{workflow.parameters.project}}/{{workflow.parameters.image}}:{{workflow.name}}"
                     command:
                       - python
                       - train.py

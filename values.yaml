@@ -1,5 +1,7 @@
 #code repo without schema
 repo: github.com/TaylorHere/bi-lstm-crf-ner-tf2.0.git
+#local name of the repo
+local: crf
 #image registry base url
 registry: registry.cn-hangzhou.aliyuncs.com
 #registry project name

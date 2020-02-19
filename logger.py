@@ -28,10 +28,10 @@ import os
 from io import StringIO as StringBuffer
 log_capture_string = StringBuffer()
 
+from args_help import args
 
-proj_dir = os.path.dirname(__file__)
 try:
-    os.mkdir(os.path.join(proj_dir, 'log'))
+    os.mkdir(args.log_dir)
 except:
     pass
     
@@ -69,7 +69,7 @@ _LOGGING = {
             # 'backupCount': 3,
             'when': 'midnight',
             'interval': 1,
-            'filename': os.path.join(proj_dir, 'log/debug.log')
+            'filename': os.path.join(args.log_dir, 'debug.log')
         },
         'err_file': {
             'level': 'ERROR',
@@ -77,7 +77,7 @@ _LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'midnight',
             'interval': 1,
-            'filename': os.path.join(proj_dir, 'log/error.log')
+            'filename': os.path.join(args.log_dir, 'error.log')
         },
         'perf': {
             'level': 'INFO',
@@ -85,7 +85,7 @@ _LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'midnight',
             'interval': 1,
-            'filename': os.path.join(proj_dir, 'log/info.log')
+            'filename': os.path.join(args.log_dir, 'info.log')
         },
         'track': {
             'level': 'WARN',
@@ -93,7 +93,7 @@ _LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'midnight',
             'interval': 1,
-            'filename': os.path.join(proj_dir, 'log/warn.log')
+            'filename': os.path.join(args.log_dir, 'warn.log')
         },
 
     },
